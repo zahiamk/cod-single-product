@@ -38,7 +38,7 @@ export default function Home() {
         <div>
           <span className="inline-flex rounded-full bg-[#c65b32] px-3 py-1 text-xs font-bold text-white">لعبة تعليمية للأطفال</span>
           <h1 className="mt-6 text-5xl font-black leading-[1.05] md:text-7xl">تعلّم الأرقام<br/><span className="text-[#c65b32]">بطريقة ممتعة!</span></h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-black/60">لعبة الأرقام الخشبية الملوّنة تساعد طفلك على التعرف على الأرقام من 1 إلى 20 وترتيبها ومطابقتها بطريقة عملية وممتعة.</p>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-black/60">لعبة الأرقام الخشبية الملوّنة هي وسيلة تعليمية ممتعة تساعد طفلك على تعلّم الأرقام من 1 إلى 20 بطريقة عملية وتفاعلية. من خلال اللعب، يتدرّب الطفل على العدّ وترتيب الأرقام، إجراء عمليات الجمع والطرح البسيطة، والمقارنة بين الأرقام مثل أكبر من وأصغر من، مع تنمية التركيز والتفكير المنطقي والمهارات الحسابية..</p>
           <div className="mt-8 flex items-end gap-3"><span className="text-4xl font-black">{price.toLocaleString("ar-DZ")} دج</span><span className="mb-1 text-lg text-black/35 line-through">3,990 دج</span></div>
           <a href="#order" className="mt-8 inline-flex rounded-2xl bg-[#c65b32] px-7 py-4 font-bold text-white shadow-xl">أريد طلب اللعبة الآن ←</a>
           <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-black/60"><span>✓ الدفع عند الاستلام</span><span>✓ توصيل إلى المنزل</span><span>✓ مناسبة للتعلم واللعب</span></div>
