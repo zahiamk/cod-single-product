@@ -1,11 +1,12 @@
  "use client";
 
 import { FormEvent, useState } from "react";
-const [isSubmitting, setIsSubmitting] = useState(false);
+
 const wilayas = ["أدرار","الشلف","الأغواط","أم البواقي","باتنة","بجاية","بسكرة","بشار","البليدة","البويرة","تمنراست","تبسة","تلمسان","تيارت","تيزي وزو","الجزائر","الجلفة","جيجل","سطيف","سعيدة","سكيكدة","سيدي بلعباس","عنابة","قالمة","قسنطينة","المدية","مستغانم","المسيلة","معسكر","ورقلة","وهران","البيض","إليزي","برج بوعريريج","بومرداس","الطارف","تندوف","تيسمسيلت","الوادي","خنشلة","سوق أهراس","تيبازة","ميلة","عين الدفلى","النعامة","عين تموشنت","غرداية","غليزان"];
 const price = 2990;
 
 export default function Home() {
+ const [isSubmitting, setIsSubmitting] = useState(false);
   const [qty, setQty] = useState(1);
   const [sent, setSent] = useState(false);
   const total = price * qty;
