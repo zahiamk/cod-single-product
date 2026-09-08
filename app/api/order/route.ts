@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -40,11 +39,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           ok: false,
-          message: "Google Sheets n'est pas configuré.",
+          message: "GOOGLE_SHEETS_URL غير موجود في إعدادات الموقع.",
         },
         { status: 500 }
       );
     }
+
+    console.log("Sending order to Google Sheets...");
 
     const sheetsResponse = await fetch(sheetsUrl, {
       method: "POST",
@@ -52,37 +53,49 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(order),
+      redirect: "follow",
+      cache: "no-store",
     });
 
-    if (!sheetsResponse.ok) {
-      console.error(
-        "Google Sheets error:",
-        sheetsResponse.status,
-        sheetsResponse.statusText
-      );
+    const sheetsText = await sheetsResponse.text();
 
+    console.log(
+      "Google Sheets status:",
+      sheetsResponse.status
+    );
+
+    console.log(
+      "Google Sheets response:",
+      sheetsText
+    );
+
+    if (!sheetsResponse.ok) {
       return NextResponse.json(
         {
           ok: false,
-          message: "Impossible d'enregistrer la commande.",
+          message: `Google Sheets error: ${sheetsResponse.status}`,
         },
         { status: 500 }
       );
     }
 
-    console.log("NEW COD ORDER", order);
+    console.log("NEW COD ORDER:", order);
 
     return NextResponse.json({
       ok: true,
       orderId: order.id,
     });
+
   } catch (error) {
-    console.error("ORDER ERROR", error);
+    console.error("ORDER ERROR:", error);
 
     return NextResponse.json(
       {
         ok: false,
-        message: "Erreur serveur.",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Erreur serveur.",
       },
       { status: 500 }
     );
