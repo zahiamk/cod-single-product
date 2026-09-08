@@ -104,13 +104,13 @@ export default function Home() {
         result = JSON.parse(text);
       } catch {
         throw new Error(
-          `Réponse serveur invalide (${response.status})`
+          'Réponse serveur invalide (${response.status})'
         );
       }
 
       if (!response.ok || !result.ok) {
         throw new Error(
-          result.message || `Erreur serveur (${response.status})`
+          result.message || 'Erreur serveur (${response.status})'
         );
       }
 
