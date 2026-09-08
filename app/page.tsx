@@ -10,20 +10,42 @@ export default function Home() {
   const [sent, setSent] = useState(false);
   const total = price * qty;
 
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+async function submit(e: FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+
+  if (isSubmitting) return;
+
+  setIsSubmitting(true);
+
+  try {
     const form = new FormData(e.currentTarget);
+
     const response = await fetch("/api/order", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        name: form.get("name"), phone: form.get("phone"),
-        wilaya: form.get("wilaya"), commune: form.get("commune"), quantity: qty
-      })
+        name: form.get("name"),
+        phone: form.get("phone"),
+        wilaya: form.get("wilaya"),
+        commune: form.get("commune"),
+        quantity: qty,
+      }),
     });
-    if (response.ok) setSent(true);
-    else alert("تعذر تسجيل الطلب. يرجى المحاولة مرة أخرى.");
+
+    if (response.ok) {
+      setSent(true);
+    } else {
+      alert("Impossible d'enregistrer la commande. Réessayez.");
+      setIsSubmitting(false);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Une erreur est survenue. Réessayez.");
+    setIsSubmitting(false);
   }
+}
 
   return (
     <main dir="rtl">
