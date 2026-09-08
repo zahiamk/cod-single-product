@@ -66,7 +66,9 @@ export default function Home() {
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -81,8 +83,6 @@ export default function Home() {
         quantity: qty,
       };
 
-      console.log("SENDING ORDER:", data);
-
       const response = await fetch("/api/order", {
         method: "POST",
         headers: {
@@ -90,33 +90,19 @@ export default function Home() {
           Accept: "application/json",
         },
         body: JSON.stringify(data),
-        cache: "no-store",
       });
 
-      const text = await response.text();
-
-      console.log("API STATUS:", response.status);
-      console.log("API RESPONSE:", text);
-
-      let result;
-
-      try {
-        result = JSON.parse(text);
-      } catch {
-        throw new Error(
-          'Réponse serveur invalide (${response.status})'
-        );
-      }
+      const result = await response.json();
 
       if (!response.ok || !result.ok) {
         throw new Error(
-          result.message || 'Erreur serveur (${response.status})'
+          result.message || "Impossible d'enregistrer la commande."
         );
       }
 
       setSent(true);
     } catch (error) {
-      console.error("ORDER SUBMIT ERROR:", error);
+      console.error("ORDER ERROR:", error);
 
       alert(
         error instanceof Error
@@ -129,7 +115,7 @@ export default function Home() {
   }
 
   return (
-    <main dir="rtl">
+    <main dir="rtl" className="min-h-screen bg-[#faf8f3] text-black">
       {/* HEADER */}
       <header className="sticky top-0 z-30 border-b border-black/10 bg-[#faf8f3]/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
@@ -231,15 +217,17 @@ export default function Home() {
               "لعب وتعلّم",
               "نشاط بسيط يمكن استخدامه في البيت مع الوالدين أو بشكل مستقل.",
             ],
-          ].map(([n, t, d]) => (
-            <div key={n}>
+          ].map(([number, title, description]) => (
+            <div key={number}>
               <div className="text-sm font-black text-[#c65b32]">
-                {n}
+                {number}
               </div>
 
-              <h2 className="mt-3 text-xl font-black">{t}</h2>
+              <h2 className="mt-3 text-xl font-black">{title}</h2>
 
-              <p className="mt-2 leading-7 text-black/55">{d}</p>
+              <p className="mt-2 leading-7 text-black/55">
+                {description}
+              </p>
             </div>
           ))}
         </div>
@@ -284,7 +272,7 @@ export default function Home() {
               "وقت ممتع مع العائلة",
               "نشاط مناسب للعب والتعلم مع الوالدين.",
             ],
-          ].map(([icon, title, text]) => (
+          ].map(([icon, title, description]) => (
             <div
               key={title}
               className="rounded-3xl border border-black/10 bg-white p-6"
@@ -294,7 +282,7 @@ export default function Home() {
               <h3 className="font-black">{title}</h3>
 
               <p className="mt-2 text-sm leading-6 text-black/50">
-                {text}
+                {description}
               </p>
             </div>
           ))}
@@ -339,7 +327,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* FORM CARD */}
+          {/* FORM */}
           <div className="rounded-[2rem] bg-white p-6 text-black shadow-2xl md:p-8">
             {sent ? (
               <div className="py-12 text-center">
@@ -479,7 +467,7 @@ export default function Home() {
                   </span>
                 </div>
 
-                {/* SUBMIT */}
+                {/* SUBMIT BUTTON */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
