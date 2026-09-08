@@ -16,25 +16,72 @@ export default function Home() {
   const [qty, setQty] = useState(1);
   const [sent, setSent] = useState(false);
 
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+async function submit(e: FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+
+  if (isSubmitting) return;
+
+  setIsSubmitting(true);
+
+  try {
     const form = new FormData(e.currentTarget);
+
+    const data = {
+      name: String(form.get("name") || "").trim(),
+      phone: String(form.get("phone") || "").trim(),
+      wilaya: String(form.get("wilaya") || "").trim(),
+      commune: String(form.get("commune") || "").trim(),
+      quantity: qty,
+    };
+
+    console.log("SENDING ORDER:", data);
 
     const response = await fetch("/api/order", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.get("name"),
-        phone: form.get("phone"),
-        wilaya: form.get("wilaya"),
-        commune: form.get("commune"),
-        quantity: qty
-      })
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(data),
+      cache: "no-store",
     });
 
-    if (response.ok) setSent(true);
-    else alert("Impossible d'enregistrer la commande. Réessayez.");
+    const text = await response.text();
+
+    console.log("API STATUS:", response.status);
+    console.log("API RESPONSE:", text);
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error(
+        `Réponse serveur invalide (${response.status}): ${text}`
+      );
+    }
+
+    if (!response.ok || !result.ok) {
+      throw new Error(
+        result.message || `Erreur serveur (${response.status})`
+      );
+    }
+
+    setSent(true);
+    setIsSubmitting(false);
+
+  } catch (error) {
+    console.error("ORDER SUBMIT ERROR:", error);
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : "Une erreur est survenue. Réessayez."
+    );
+
+    setIsSubmitting(false);
   }
+}
 
   return (
     <main>
