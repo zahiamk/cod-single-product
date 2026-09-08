@@ -4,13 +4,22 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    const clientOrderId = body?.clientOrderId;
     const name = body?.name;
     const phone = body?.phone;
     const wilaya = body?.wilaya;
     const commune = body?.commune;
     const quantity = body?.quantity;
 
-    if (!name || !phone || !wilaya || !commune || !quantity) {
+    // Validate required fields
+    if (
+      !clientOrderId ||
+      !name ||
+      !phone ||
+      !wilaya ||
+      !commune ||
+      !quantity
+    ) {
       return NextResponse.json(
         {
           ok: false,
@@ -20,17 +29,37 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate quantity
+    const numericQuantity = Number(quantity);
+
+    if (
+      !Number.isInteger(numericQuantity) ||
+      numericQuantity < 1 ||
+      numericQuantity > 9
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Quantité invalide.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create the order
     const order = {
       id: "COD-" + Date.now(),
+      clientOrderId: String(clientOrderId),
       name: String(name).trim(),
       phone: String(phone).trim(),
       wilaya: String(wilaya).trim(),
       commune: String(commune).trim(),
-      quantity: Number(quantity),
-      total: Number(quantity) * 2990,
+      quantity: numericQuantity,
+      total: numericQuantity * 2990,
       createdAt: new Date().toISOString(),
     };
 
+    // Google Sheets Apps Script URL
     const sheetsUrl = process.env.GOOGLE_SHEETS_URL;
 
     if (!sheetsUrl) {
@@ -45,12 +74,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Send order to Google Sheets
     const sheetsResponse = await fetch(sheetsUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(order),
+      cache: "no-store",
     });
 
     if (!sheetsResponse.ok) {
@@ -69,6 +100,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const sheetsResult = await sheetsResponse.json().catch(() => null);
+
+    // Google Sheets says this order was already recorded
+    if (sheetsResult?.duplicate) {
+      return NextResponse.json({
+        ok: true,
+        duplicate: true,
+        orderId: order.id,
+      });
+    }
+
     console.log("NEW COD ORDER", order);
 
     return NextResponse.json({
@@ -76,7 +118,7 @@ export async function POST(request: Request) {
       orderId: order.id,
     });
   } catch (error) {
-    console.error("ORDER ERROR", error);
+    console.error("ORDER ERROR:", error);
 
     return NextResponse.json(
       {
