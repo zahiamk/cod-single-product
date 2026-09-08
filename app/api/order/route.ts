@@ -1,23 +1,41 @@
-const sheetsResponse = await fetch(googleSheetsUrl, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify(order),
-});
+import { NextResponse } from "next/server";
 
-const sheetsText = await sheetsResponse.text();
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { name, phone, wilaya, commune, quantity } = body ?? {};
 
-console.log("GOOGLE SHEETS STATUS:", sheetsResponse.status);
-console.log("GOOGLE SHEETS RESPONSE:", sheetsText);
+    if (!name || !phone || !wilaya || !commune || !quantity) {
+      return NextResponse.json(
+        { ok: false, message: "Veuillez remplir tous les champs." },
+        { status: 400 }
+      );
+    }
 
-if (!sheetsResponse.ok) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "Google Sheets error",
-      details: sheetsText,
-    },
-    { status: 500 }
-  );
+    const order = {
+      id: `COD-${Date.now()}`,
+      name: String(name).trim(),
+      phone: String(phone).trim(),
+      wilaya: String(wilaya).trim(),
+      commune: String(commune).trim(),
+      quantity: Number(quantity),
+      total: Number(quantity) * 2990,
+      createdAt: new Date().toISOString()
+    };
+
+    // Production hook:
+    // Send `order` to your database, Google Sheets, Telegram bot,
+    // CRM, or delivery API here. No card payment is involved.
+    console.log("NEW COD ORDER", order);
+
+    return NextResponse.json({
+      ok: true,
+      orderId: order.id
+    });
+  } catch {
+    return NextResponse.json(
+      { ok: false, message: "Erreur serveur." },
+      { status: 500 }
+    );
+  }
 }
