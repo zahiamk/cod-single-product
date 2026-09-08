@@ -11,7 +11,6 @@ export async function POST(request: Request) {
     const commune = body?.commune;
     const quantity = body?.quantity;
 
-    // Validate required fields
     if (!name || !phone || !wilaya || !commune || !quantity) {
       return NextResponse.json(
         {
@@ -22,9 +21,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create the order
     const order = {
-      id: `COD-${Date.now()}`,
+      id: "COD-" + Date.now(),
       name: String(name).trim(),
       phone: String(phone).trim(),
       wilaya: String(wilaya).trim(),
@@ -34,7 +32,6 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Google Sheets Apps Script URL
     const sheetsUrl = process.env.GOOGLE_SHEETS_URL;
 
     if (!sheetsUrl) {
@@ -49,7 +46,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Send order to Google Sheets
     const sheetsResponse = await fetch(sheetsUrl, {
       method: "POST",
       headers: {
@@ -76,7 +72,6 @@ export async function POST(request: Request) {
 
     console.log("NEW COD ORDER", order);
 
-    // Success
     return NextResponse.json({
       ok: true,
       orderId: order.id,
@@ -94,4 +89,3 @@ export async function POST(request: Request) {
   }
 }
 ```
-
