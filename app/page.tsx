@@ -99,8 +99,9 @@ async function submit(e: FormEvent<HTMLFormElement>) {
               <div className="grid gap-4 sm:grid-cols-2"><div><label className="text-sm font-bold">الولاية</label><select required name="wilaya" className="mt-2 w-full rounded-xl border border-black/10 bg-[#faf8f3] px-4 py-3.5 outline-none"><option value="">اختر الولاية</option>{wilayas.map(w => <option key={w}>{w}</option>)}</select></div><div><label className="text-sm font-bold">البلدية</label><input required name="commune" className="mt-2 w-full rounded-xl border border-black/10 bg-[#faf8f3] px-4 py-3.5 outline-none" placeholder="اكتب البلدية"/></div></div>
               <div><label className="text-sm font-bold">الكمية</label><div className="mt-2 flex items-center justify-between rounded-xl border border-black/10 bg-[#faf8f3] p-2"><button type="button" onClick={() => setQty(Math.max(1,qty-1))} className="h-10 w-10 rounded-lg bg-white font-black">−</button><span className="font-black">{qty}</span><button type="button" onClick={() => setQty(Math.min(9,qty+1))} className="h-10 w-10 rounded-lg bg-white font-black">+</button></div></div>
               <div className="flex items-center justify-between border-t border-black/10 pt-5"><span className="font-bold text-black/50">المجموع</span><span className="text-2xl font-black">{total.toLocaleString("ar-DZ")} دج</span></div>
-               <button type="submit" className="w-full rounded-xl bg-[#c65b32] py-4 font-black text-white">تأكيد الطلب الآن</button> {isSubmitting ? "ENVOI EN COURS..." : "CONFIRMER MA COMMANDE"}<p className="text-center text-xs text-black/40">الدفع عند الاستلام · لا يوجد دفع بالبطاقة</p>
-             </form>}
+               <button type="submit" className="w-full rounded-xl bg-[#c65b32] py-4 font-black text-white">تأكيد الطلب الآن</button><p className="text-center text-xs text-black/40">الدفع عند الاستلام · لا يوجد دفع بالبطاقة</p>
+            
+            </form>}
           </div>
         </div>
       </section>
