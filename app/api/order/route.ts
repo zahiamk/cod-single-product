@@ -1,3 +1,4 @@
+```ts
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -10,13 +11,18 @@ export async function POST(request: Request) {
     const commune = body?.commune;
     const quantity = body?.quantity;
 
+    // Validate required fields
     if (!name || !phone || !wilaya || !commune || !quantity) {
       return NextResponse.json(
-        { ok: false, message: "Veuillez remplir tous les champs." },
+        {
+          ok: false,
+          message: "Veuillez remplir tous les champs.",
+        },
         { status: 400 }
       );
     }
 
+    // Create the order
     const order = {
       id: `COD-${Date.now()}`,
       name: String(name).trim(),
@@ -28,8 +34,49 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
+    // Google Sheets Apps Script URL
+    const sheetsUrl = process.env.GOOGLE_SHEETS_URL;
+
+    if (!sheetsUrl) {
+      console.error("GOOGLE_SHEETS_URL is not configured");
+
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Google Sheets n'est pas configuré.",
+        },
+        { status: 500 }
+      );
+    }
+
+    // Send order to Google Sheets
+    const sheetsResponse = await fetch(sheetsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    });
+
+    if (!sheetsResponse.ok) {
+      console.error(
+        "Google Sheets error:",
+        sheetsResponse.status,
+        sheetsResponse.statusText
+      );
+
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Impossible d'enregistrer la commande.",
+        },
+        { status: 500 }
+      );
+    }
+
     console.log("NEW COD ORDER", order);
 
+    // Success
     return NextResponse.json({
       ok: true,
       orderId: order.id,
@@ -38,8 +85,13 @@ export async function POST(request: Request) {
     console.error("ORDER ERROR", error);
 
     return NextResponse.json(
-      { ok: false, message: "Erreur serveur." },
+      {
+        ok: false,
+        message: "Erreur serveur.",
+      },
       { status: 500 }
     );
   }
 }
+```
+
