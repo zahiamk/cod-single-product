@@ -1,34 +1,72 @@
-function doPost(e) {
+import { NextResponse } from "next/server";
+
+export async function POST(request: Request) {
   try {
-    const sheet = SpreadsheetApp
-      .getActiveSpreadsheet()
-      .getSheets()[0];
+    const body = await request.json();
+    const { name, phone, wilaya, commune, quantity } = body ?? {};
 
-    const data = JSON.parse(e.postData.contents);
+    if (!name || !phone || !wilaya || !commune || !quantity) {
+      return NextResponse.json(
+        { ok: false, message: "Veuillez remplir tous les champs." },
+        { status: 400 }
+      );
+    }
 
-    sheet.appendRow([
-      new Date(),
-      data.id || "",
-      data.name || "",
-      data.phone || "",
-      data.wilaya || "",
-      data.commune || "",
-      data.quantity || "",
-      data.total || ""
-    ]);
+    const order = {
+      id: `COD-${Date.now()}`,
+      name: String(name).trim(),
+      phone: String(phone).trim(),
+      wilaya: String(wilaya).trim(),
+      commune: String(commune).trim(),
+      quantity: Number(quantity),
+      total: Number(quantity) * 2990,
+      createdAt: new Date().toISOString(),
+    };
 
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        ok: true
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    // Send order to Google Sheets
+    const googleSheetsUrl = process.env.GOOGLE_SHEETS_URL;
 
-  } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        ok: false,
-        error: error.toString()
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    if (!googleSheetsUrl) {
+      console.error("GOOGLE_SHEETS_URL is not configured");
+
+      return NextResponse.json(
+        { ok: false, message: "Configuration serveur manquante." },
+        { status: 500 }
+      );
+    }
+
+    const sheetsResponse = await fetch(googleSheetsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    });
+
+    if (!sheetsResponse.ok) {
+      console.error(
+        "Google Sheets error:",
+        await sheetsResponse.text()
+      );
+
+      return NextResponse.json(
+        { ok: false, message: "Impossible d'enregistrer la commande." },
+        { status: 500 }
+      );
+    }
+
+    console.log("NEW COD ORDER", order);
+
+    return NextResponse.json({
+      ok: true,
+      orderId: order.id,
+    });
+  } catch (error: unknown) {
+    console.error("Order error:", error);
+
+    return NextResponse.json(
+      { ok: false, message: "Erreur serveur." },
+      { status: 500 }
+    );
   }
 }
